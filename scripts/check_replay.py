@@ -4,7 +4,7 @@ Replays ALL recorded steps of each seed (no live model) and checks that every
 observation matches the recording byte for byte and that the final answer is
 reproduced and still grades correct.
 
-Usage (from whowhen_pro_small_scale_reproduction/):
+Usage (from the repository root):
     python -m scripts.check_replay
 """
 

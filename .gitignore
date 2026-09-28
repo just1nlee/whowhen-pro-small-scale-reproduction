@@ -1,9 +1,18 @@
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
-results/
 
-whowhen-pro/
+# Secrets and local-only files
 .env
 CLAUDE.md
+handoff.md
+
+# Large or third-party data kept out of git (download separately)
+whowhen-pro/
+da-bench/data
+whowhen_pro.pdf
+
+# Progress logs (their content is already in the run files)
+outputs/**/*.log

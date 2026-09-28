@@ -4,7 +4,7 @@ Candidate injection steps are 2..T-1 with no execution error, matching the paper
 released DA-Bench traces (never step 1, never the final-answer step) and its rule of
 excluding steps with execution errors. The model then says which candidates suit R.2 / R.3.
 
-Usage (from whowhen_pro_small_scale_reproduction/):
+Usage (from the repository root):
     python -m scripts.build_eligibility_prompt
 Writes outputs/injection/eligibility_prompt.txt. Save the model's full reply to
 outputs/injection/eligibility_response.txt.
@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RUNS_DIR = ROOT / "outputs" / "seeds" / "runs"
 OUT_DIR = ROOT / "outputs" / "injection"
 TEMPLATE = ROOT / "prompts" / "step_eligibility.txt"
-TAXONOMY = ROOT.parent / "whowhen-pro" / "taxonomy.yaml"
+TAXONOMY = ROOT / "whowhen-pro" / "taxonomy.yaml"
 
 
 def candidate_steps(seed: dict) -> list[int]:

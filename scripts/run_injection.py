@@ -1,6 +1,6 @@
 """Stages 3-4: run the injection attempts in outputs/injection/plan.json.
 
-Usage (from whowhen_pro_small_scale_reproduction/):
+Usage (from the repository root):
     python -m scripts.run_injection --only 18:R.2 66:R.3   # specific attempts (e.g. a pilot)
     python -m scripts.run_injection                        # every attempt in the plan
     python -m scripts.run_injection --verbose              # also print each agent step

@@ -12,7 +12,7 @@ Output, laid out as a dataset checkout for whowhen_eval (--data-root outputs/eva
     outputs/eval_data/manifest.json     every attempt: kept/dropped, reason, flags,
                                         injection details (never shown to the judge)
 
-Usage (from whowhen_pro_small_scale_reproduction/):
+Usage (from the repository root):
     python -m scripts.export_eval_data
 """
 
@@ -28,7 +28,7 @@ from repro.grader import grade
 ROOT = Path(__file__).resolve().parent.parent
 RUNS_DIR = ROOT / "outputs" / "injection" / "runs"
 OUT_DIR = ROOT / "outputs" / "eval_data"
-TAXONOMY = ROOT.parent / "whowhen-pro" / "taxonomy.yaml"
+TAXONOMY = ROOT / "whowhen-pro" / "taxonomy.yaml"
 
 # Phrases in the injected step that would reveal the injection prompt to a reader.
 LEAK_PATTERNS = [r"inject", r"instruct", r"red[- ]?team", r"\bflaw", r"deliberate", r"intentional",

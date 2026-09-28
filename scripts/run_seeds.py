@@ -1,6 +1,6 @@
 """Stage 1: run the smolagents CodeAgent on DA-Bench questions and record full trajectories.
 
-Usage (from whowhen_pro_small_scale_reproduction/):
+Usage (from the repository root):
     python -m scripts.run_seeds --n 40            # select 40 questions and run them
     python -m scripts.run_seeds --n 40 --verbose  # also print each step's thought/code/output
     python -m scripts.run_seeds --ids 0 5 6       # run specific question ids
@@ -23,7 +23,7 @@ from repro.grader import grade
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "outputs" / "seeds"
-PAPER_TRACES = ROOT.parent / "whowhen-pro" / "data" / "text.jsonl"
+PAPER_TRACES = ROOT / "whowhen-pro" / "data" / "text.jsonl"
 
 MIN_SEED_STEPS = 2
 SELECTION_SEED = 0

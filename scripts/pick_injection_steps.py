@@ -4,7 +4,7 @@ Reads outputs/injection/eligibility_response.txt (the reply to eligibility_promp
 checks it against candidate_steps.json, and samples t uniformly from each eligible list
 with a fixed random seed. Seeds with no eligible step for a mode are skipped for that mode.
 
-Usage (from whowhen_pro_small_scale_reproduction/):
+Usage (from the repository root):
     python -m scripts.pick_injection_steps
 Writes outputs/injection/plan.json.
 """
