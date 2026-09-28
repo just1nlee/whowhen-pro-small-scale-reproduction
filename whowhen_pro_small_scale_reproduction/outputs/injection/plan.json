@@ -1,0 +1,550 @@
+[
+ {
+  "task_id": 18,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   2,
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 18,
+  "mode": "R.3",
+  "t": 4,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 62,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2,
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 62,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   2,
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 66,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 66,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 114,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 132,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 132,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 139,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 139,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 175,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 175,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 214,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2,
+   4,
+   5
+  ]
+ },
+ {
+  "task_id": 214,
+  "mode": "R.3",
+  "t": 5,
+  "eligible": [
+   2,
+   4,
+   5
+  ]
+ },
+ {
+  "task_id": 217,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 219,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 219,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 243,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 243,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 247,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 247,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 249,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 249,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 272,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 272,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 273,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 273,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 349,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 349,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 376,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 376,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 412,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 412,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 446,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 446,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 465,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 465,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 472,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 472,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 496,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 496,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 510,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 510,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 514,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 514,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 618,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 618,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3
+  ]
+ },
+ {
+  "task_id": 647,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 647,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 666,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 666,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 685,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 685,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 688,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 688,
+  "mode": "R.3",
+  "t": 4,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 716,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   2,
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 716,
+  "mode": "R.3",
+  "t": 3,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 719,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 719,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2
+  ]
+ },
+ {
+  "task_id": 722,
+  "mode": "R.2",
+  "t": 3,
+  "eligible": [
+   3,
+   4
+  ]
+ },
+ {
+  "task_id": 722,
+  "mode": "R.3",
+  "t": 4,
+  "eligible": [
+   4
+  ]
+ },
+ {
+  "task_id": 725,
+  "mode": "R.2",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ },
+ {
+  "task_id": 725,
+  "mode": "R.3",
+  "t": 2,
+  "eligible": [
+   2,
+   3
+  ]
+ }
+]

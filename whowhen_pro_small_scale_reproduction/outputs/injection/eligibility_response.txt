@@ -1,0 +1,78 @@
+Response to outputs/injection/eligibility_prompt.txt
+Produced by: Claude Opus 5.5 (claude-opus-5-5), inside a Claude Code session, 2026-09-27.
+
+Per-seed notes (steps not listed were judged ineligible for that mode):
+
+18  s2 column/deletion choice (R.2); s3 IQR bounds + filter (R.2, R.3); s4 mean/std on filtered array (R.2 stale variable, R.3 ddof/rounding).
+62  s2 column + original mean (R.2, R.3); s3 IQR outliers (R.2, R.3); s4 country count + mean w/o outliers (R.2, R.3); s5 verification after full answer printed (criterion 5).
+66  s2 Pearson on chosen columns (R.2 column, R.3 rounding); s3 linear/nonlinear decision (R.2); no calculation at s3.
+114 s2 max score lookup (R.2 reversed superlative / rank vs score); no calculation for R.3.
+132 s2 mean/std (R.3); s3 z-scores + count (R.2 threshold, R.3 count); s4 verification after answer printed (criterion 5).
+139 s2 picking the per_dem column (R.2); s3 Shapiro-Wilk + decision (R.2 reversed test, R.3 misreading 1.4e-33).
+175 s2 zscore on non-null ages (R.2, R.3); s3 outlier count (R.2, R.3).
+214 s2 source filter + length count, later copied into s4 (R.2, R.3); s3 only lists sources (no choice in code); s4 filter + length (R.2, R.3); s5 correlations (R.2, R.3); s6 after answer printed (criterion 5).
+217 s2 max positive_diffsel lookup (R.2); no calculation; s3 after answer printed (criterion 5).
+219 s2 IQR outliers (R.2, R.3); s3 rounding of outlier values (R.3; rounded values not yet shown).
+243 s2 filter + mean + rounding (R.2, R.3).
+247 s2 groupby + group mapping (R.2 swapped groups, R.3 rounding).
+249 s2 Pearson (R.2, R.3); s3 verification after answer printed (criterion 5).
+272 s2 only describes columns; s3 ratio + mean/std (R.2 inverted ratio, R.3); s4 after answer printed (criterion 5).
+273 s2 correlation (R.2, R.3); s3 z-score outliers (R.2, R.3); s4 verification after answer printed (criterion 5).
+324 s2 comes after step 1 already printed the answer (criterion 5); no eligible step.
+349 s2 mean + rounding (R.2, R.3).
+376 s2 only displays data; s3 ratio + mean/median (R.2, R.3); s4-s5 after answer printed (criterion 5).
+412 s2 FamilySize construction (R.3 off-by-one); s3 group means (R.2 swapped labels, R.3).
+446 s2 mean + rounding (R.2 wrong column, R.3).
+465 s2 only describes Age; s3 skew + classification (R.2 direction, R.3 rounding at the -0.5 boundary).
+472 s2 mean with nulls (R.2 null handling, R.3 rounding).
+496 s2 choice of STEM fields (R.2); s3 sum + year filter (R.2 boundary reading, R.3 off-by-one); s4 mean/range (R.3); s5 verification after answer printed (criterion 5).
+510 s2 only explores data; s3 filters (R.2 order/threshold, R.3 off-by-one); s4 brand averages + max (R.2, R.3).
+514 s2 city averages (R.2, R.3); s3 threshold interpretation + counts (R.2, R.3); s4 after answer printed (criterion 5).
+618 s2 only reloads the data; s3 corr (R.2 column, R.3 rounding).
+647 s2 Price Range + mean/std (R.2 sign/columns, R.3 ddof); s3 Shapiro-Wilk + decision (R.2, R.3).
+666 s2 mean/std (R.2 column, R.3 ddof/rounding).
+685 s2 Pearson + significance (R.2, R.3).
+688 s2 only displays dt; s3 timestamp conversion (R.2 timezone, R.3 unit conversion); s4 binning + counts (R.2 boundaries, R.3 counting).
+716 s2 reading the header-row structure (R.2); s3 dropping the header row (R.2, R.3 off-by-one); s4 mean/std (R.2, R.3 ddof).
+719 s2 mean/median + rounding (R.2, R.3).
+722 s2 only describes horsepower; s3 argmax + model year (R.2); s4 same-year mean + population std + year conversion (R.2, R.3); s5 after answer printed (criterion 5).
+725 s2 top-3 displacement values (R.2, R.3 off-by-one); s3 per-value mean/median (R.2, R.3).
+
+```json
+{
+  "18":  {"R.2": [2, 3, 4], "R.3": [3, 4]},
+  "62":  {"R.2": [2, 3, 4], "R.3": [2, 3, 4]},
+  "66":  {"R.2": [2, 3], "R.3": [2]},
+  "114": {"R.2": [2], "R.3": []},
+  "132": {"R.2": [3], "R.3": [2, 3]},
+  "139": {"R.2": [2, 3], "R.3": [3]},
+  "175": {"R.2": [2, 3], "R.3": [2, 3]},
+  "214": {"R.2": [2, 4, 5], "R.3": [2, 4, 5]},
+  "217": {"R.2": [2], "R.3": []},
+  "219": {"R.2": [2], "R.3": [2, 3]},
+  "243": {"R.2": [2], "R.3": [2]},
+  "247": {"R.2": [2], "R.3": [2]},
+  "249": {"R.2": [2], "R.3": [2]},
+  "272": {"R.2": [3], "R.3": [3]},
+  "273": {"R.2": [2, 3], "R.3": [2, 3]},
+  "324": {"R.2": [], "R.3": []},
+  "349": {"R.2": [2], "R.3": [2]},
+  "376": {"R.2": [3], "R.3": [3]},
+  "412": {"R.2": [3], "R.3": [2, 3]},
+  "446": {"R.2": [2], "R.3": [2]},
+  "465": {"R.2": [3], "R.3": [3]},
+  "472": {"R.2": [2], "R.3": [2]},
+  "496": {"R.2": [2, 3], "R.3": [3, 4]},
+  "510": {"R.2": [3, 4], "R.3": [3, 4]},
+  "514": {"R.2": [2, 3], "R.3": [2, 3]},
+  "618": {"R.2": [3], "R.3": [3]},
+  "647": {"R.2": [2, 3], "R.3": [2, 3]},
+  "666": {"R.2": [2], "R.3": [2]},
+  "685": {"R.2": [2], "R.3": [2]},
+  "688": {"R.2": [3, 4], "R.3": [3, 4]},
+  "716": {"R.2": [2, 3, 4], "R.3": [3, 4]},
+  "719": {"R.2": [2], "R.3": [2]},
+  "722": {"R.2": [3, 4], "R.3": [4]},
+  "725": {"R.2": [2, 3], "R.3": [2, 3]}
+}
+```

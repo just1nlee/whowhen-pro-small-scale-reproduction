@@ -1,0 +1,155 @@
+P.1:
+  name: Visual misidentification
+  description: 'Wrong object, entity, or text recognition in image input. Includes misreading chart values,
+    document content, OCR errors, confusing visually similar entities, and misidentifying people, characters,
+    products, or games from images. Often cascades into downstream reasoning errors when the agent builds
+    correct reasoning on a wrong visual premise.
+
+    '
+P.2:
+  name: Spatial/grounding error
+  description: 'Selecting or targeting the wrong spatial region in an image or UI. Includes misclicking
+    UI elements, wrong bounding box, cropping the wrong area, drawing incorrect auxiliary marks on a sketchpad.
+
+    '
+R.1:
+  name: Hallucination
+  description: 'Generating claims that are NOT grounded in any observation the agent has retrieved. The
+    agent fabricates facts from parametric knowledge, stale training data, or whole cloth — confidently
+    asserting something that does not appear anywhere in its search results or tool outputs. Distinguished
+    from R.2: in R.1 the wrong claim is ABSENT from all observations; in R.2 the wrong claim is traceable
+    to something the agent actually saw but misapplied.
+
+    '
+R.2:
+  name: Reasoning error
+  description: 'The agent has the right high-level frame but makes a localized reasoning mistake that
+    derails the chain. Includes two related sub-shapes:
+
+    (1) Grounded misapplication: the agent has correct information in its observations but misapplies,
+    confuses, or draws wrong conclusions from it. The wrong answer IS traceable to something that actually
+    appears in the observations — entity confusion, temporal mix-up, reversed comparison, misattribution
+    across sources.
+
+    (2) Local derivation bug: the agent chose the right algorithmic frame and the overall plan is correct,
+    but a single derivation step, case-split, invariant, or state update is broken. Common errors: sign
+    flipped on an inequality, missed even/odd parity branch, stale state in a tracking variable, broken
+    invariant maintenance, missing edge case, wrong direction in a recurrence. The error is *local* —
+    patching that one step would make the algorithm work.
+
+    Distinguished from R.4: could the candidate output, with arbitrarily many local bug fixes (sign flips,
+    added branches, fixed invariants), eventually pass? Yes → R.2. No → R.4 (wrong frame).
+
+    '
+R.3:
+  name: Numerical/calculation error
+  description: 'Arithmetic mistakes, unit conversion errors, counting errors, measurement errors, off-by-one
+    errors, rounding errors.
+
+    '
+R.4:
+  name: Task misunderstanding
+  description: 'The agent''s mental model of the task is wrong at the structural level. Includes two related
+    types:
+
+    (1) Spec-level misunderstanding: misreading the question scope, confusing which attribute is being
+    queried, misunderstanding role specifications, scope inflation (adding unrequested elements), and
+    answering a subtly different question than what was asked.
+
+    (2) Abstraction-level misunderstanding: the agent reads the problem statement correctly but commits
+    to a wrong reduction, wrong solution family, or wrong algorithmic abstraction. The chosen solution-space
+    is over-restrictive, wrong-shape, or maps to a different problem than the one being solved. Includes
+    "wrong algorithm class", "over-restrictive parameterization", and "false equivalence".
+
+    Distinguishability test (R.4 vs R.2): could the candidate output, with arbitrarily many local bug
+    fixes, ever satisfy the task? If no — the structural choice is wrong, it''s R.4.
+
+    '
+PL.1:
+  name: Ineffective Planning
+  description: 'The agent''s high-level plan or strategy is unsound, leading the rollout toward a dead
+    end that would require revision rather than incremental continuation. Examples include adopting wrong
+    premises in the plan, poor decomposition of the task into sub-goals, or failing to reformulate when
+    the initial approach proves unworkable. The fault is in the plan rather than in any single execution
+    step.
+
+    '
+PL.2:
+  name: Goal drift
+  description: 'Gradually deviating from the original task objective during multi-step execution. The
+    agent starts correctly but progressively shifts focus to tangential or irrelevant sub-goals, losing
+    sight of the original question.
+
+    '
+A.1:
+  name: Tool parameter/invocation error
+  description: 'Correct tool but wrong arguments, malformed call, missing required parameters, wrong configuration,
+    or incomplete action sequence (omitting required precondition calls in stateful workflows).
+
+    '
+A.2:
+  name: Output format/syntax error
+  description: 'Malformed structured output (JSON, code, API response), broken syntax, incorrect diff
+    format, code that doesn''t parse, or final answer in wrong format. Includes returning verbose explanations
+    when a concise answer is expected, or providing a narrative when a single value is required.
+
+    '
+A.3:
+  name: Premature termination
+  description: 'Stopping before task objectives are fully met. Includes returning partial results as final,
+    producing zero tool calls on a valid turn, being unaware of completion criteria, and cross-domain
+    tool-call dropout (e.g. completing tasks in one API domain but failing to act in the next). Also includes
+    refusing to engage with a task entirely.
+
+    '
+A.4:
+  name: Repetitive/looping behavior
+  description: 'Repeating the same or equivalent actions without progress. Includes retry loops with identical
+    parameters, re-executing completed steps, and resource waste through redundant tool calls.
+
+    '
+V.1:
+  name: Context/memory loss
+  description: 'Losing or failing to retrieve relevant information from conversation history, prior observations,
+    or external memory stores. Includes context window overflow, forgetting earlier constraints, using
+    outdated information despite updates.
+
+    '
+V.2:
+  name: Inadequate or incorrect verification
+  description: 'Failing to verify results before returning them, or verifying incorrectly. Includes: skipping
+    verification entirely, accepting incorrect outputs without checking, performing incomplete validation,
+    wrong verification that incorrectly confirms incorrect answers, failing to cross-check when multiple
+    sources give conflicting information, uncritically accepting false premises or contradictory evidence,
+    misinterpreting results of own actions, misattributing errors to wrong causes, and overcorrecting
+    a correct answer into an incorrect one.
+
+    '
+C.1:
+  name: Delegation/orchestration error
+  description: 'Assigning subtask to wrong agent, improper sub-task decomposition, role confusion (agent
+    behaving like another), capability mismatch (delegating tasks beyond agent''s capabilities), and conflicting
+    actions between agents.
+
+    '
+C.2:
+  name: Communication failure
+  description: 'Withholding critical information from other agents, ignoring other agents'' input or recommendations,
+    failing to ask for clarification when instructions are ambiguous, and losing shared context across
+    agent boundaries.
+
+    '
+C.3:
+  name: Over-reliance on other agents
+  description: 'Agent produces a sound answer or reasoning independently, then revises it after seeing
+    another agent''s output, adopting a less accurate position. The agent''s own reasoning was not flawed
+    — the error is in the revision decision: the agent treated another agent''s output as more reliable
+    than its own when it should not have.
+
+    Distinguished from R.2: in R.2 the agent''s own reasoning chain is flawed; in C.3 the agent would
+    have been correct without the multi-agent interaction. The failure lives in the handoff, not in any
+    single agent''s local reasoning.
+
+    Applies to any topology with directional information flow between agents.
+
+    '

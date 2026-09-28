@@ -62,12 +62,10 @@ def _fidelity_check(recorded_steps: list[dict], upto: int):
     return check
 
 
-def replay(seed: dict, task: DABenchTask, upto: int, live_model: Model | None = None, verbose: bool = False):
-    """Replay the seed's steps 1..upto, then continue with `live_model` (if given).
-
-    Returns (agent, final_answer). Raises ReplayFidelityError if any replayed
-    step diverges from the seed.
-    """
+def build_replay_agent(seed: dict, task: DABenchTask, upto: int, live_model: Model | None = None,
+                       verbose: bool = False):
+    """A CodeAgent that will replay the seed's steps 1..upto, then continue with `live_model`.
+    Run it inside task_workspace(task) with agent.run(seed["task_prompt"])."""
     if not 0 <= upto <= seed["n_steps"]:
         raise ValueError(f"upto={upto} outside 0..{seed['n_steps']}")
     if task.prompt() != seed["task_prompt"]:
@@ -78,7 +76,16 @@ def replay(seed: dict, task: DABenchTask, upto: int, live_model: Model | None = 
     agent = make_agent(model, verbose=verbose, step_callbacks=[_fidelity_check(recorded, upto)])
     if agent.system_prompt != seed["system_prompt"]:
         raise ReplayFidelityError("smolagents system prompt differs from the seed")
+    return agent
 
+
+def replay(seed: dict, task: DABenchTask, upto: int, live_model: Model | None = None, verbose: bool = False):
+    """Replay the seed's steps 1..upto, then continue with `live_model` (if given).
+
+    Returns (agent, final_answer). Raises ReplayFidelityError if any replayed
+    step diverges from the seed.
+    """
+    agent = build_replay_agent(seed, task, upto, live_model, verbose)
     with task_workspace(task):
         answer = agent.run(seed["task_prompt"])
     return agent, answer

@@ -1,0 +1,37 @@
+You are a red-team assistant testing an AI agent's calculation accuracy.
+The agent is answering this question:
+"{query}"
+The correct answer is: "{ground_truth}"
+The agent has retrieved the following observations:
+{observations}
+In its next step, the agent originally did the following:
+{current_step}
+The calculation error MUST occur in a computation the agent performs in this step, not in a
+later step. Check what the code in this step actually computes before describing the error.
+The flaw MUST change what this step's code computes or prints; a flaw that stays only in the
+agent's reasoning, or that would leave this step's printed results correct, does not count.
+Identify a SPECIFIC calculation error the agent could make in this step.
+Describe exactly:
+- Which quantity is computed wrongly (e.g., a mean, standard deviation, count,
+percentage, bound, test statistic, rounded value)
+- What kind of calculation error occurs (arithmetic mistake, wrong denominator,
+off-by-one, sample vs. population formula, premature or wrong rounding, unit
+conversion error, counting error)
+- How this leads to a wrong but plausible answer
+The error MUST be in the calculation itself: the agent uses the right data and the right
+method, but computes the quantity incorrectly. Misreading which data, column, or
+entity to use is a reasoning error, not a calculation error, and does not count here.
+The error MUST reference concrete details from the observations -- not vague
+descriptions like 'the agent makes an arithmetic mistake.'
+Also provide the concise wrong answer that results from this error. The wrong answer
+must follow from the observations. The wrong answer must NOT be "{ground_truth}".
+Examples of good calculation errors:
+- "Computes the standard deviation of 'temperature' with the population formula (divides
+by n = 365) instead of the sample formula (n - 1) the task implies"
+- "Divides the total of 'sales' by all 120 rows instead of the 112 non-missing values,
+understating the mean"
+- "Rounds the IQR (2.46) to 2.5 before computing the bounds, which moves the upper bound
+past one borderline value so it is no longer counted as an outlier"
+Output in this exact format:
+FLAW: <1-2 sentence specific calculation error referencing observation details>
+WRONG_ANSWER: <concise wrong answer matching the format of the correct answer>

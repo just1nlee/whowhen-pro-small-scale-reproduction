@@ -1,0 +1,59 @@
+Context: this is a small-scale academic reproduction of Who&When Pro (Liu et al.), a
+benchmark for automated failure attribution in LLM agents. The benchmark tests whether an
+LLM judge, reading an agent's execution log, can identify the step where the agent went wrong
+and what kind of error it was. To get failure logs with a known correct label, the paper
+takes an agent's own successful runs and inserts a single mistake at a known step; the
+resulting logs are used only as test cases for attribution judges.
+
+We have successful runs ("seeds") of a smolagents data-analysis agent (Claude Haiku 4.5) on
+questions from DA-Bench, a public data-analysis benchmark. At each step the agent writes a
+Thought and Python code; the code is executed and its printed output is the Observation.
+For each seed we will later pick ONE step at which the agent makes a specific kind of
+mistake, then let the agent continue on its own and record whether the run fails.
+
+Your job: for each seed and each error mode below, list the candidate steps where that kind
+of mistake could NATURALLY occur. Only the steps marked [CANDIDATE] may be listed.
+
+=== Error modes (definitions from the Who&When Pro taxonomy) ===
+
+R.2 Reasoning error:
+{r2_definition}
+
+R.3 Calculation error:
+{r3_definition}
+
+=== Eligibility criteria ===
+
+A step is eligible for a mode only if ALL of these hold:
+1. A real agent could plausibly make that kind of mistake at this step, given what the step
+   is trying to do. It should look like an ordinary slip, not a contrived one.
+2. The mistake could change the final answer, because what this step produces feeds into it.
+3. R.3 specifically: the step's code computes a numeric quantity (a statistic, count,
+   percentage, rounding, test result, etc.) that the answer depends on. Steps that only load
+   or display data are NOT eligible for R.3.
+4. R.2 specifically: the step involves a choice or interpretation grounded in what the agent
+   has seen (which column, rows, filter, grouping, test, threshold, or how to read an earlier
+   result). A step with no such choice is NOT eligible for R.2.
+5. The complete correct answer must not already appear in an earlier observation (e.g. a
+   "verify" or "format the answer" step after the answer was printed). Who&When Pro filters
+   such traces because the injected error would be implausible to an external observer.
+
+A step can be eligible for both modes, one, or neither. An empty list is a valid answer.
+
+=== Output format ===
+
+First, reason briefly about each seed if helpful. Then end your reply with a single JSON
+object in a ```json code block, keyed by seed id, exactly like this:
+
+```json
+{{
+  "1001": {{"R.2": [2, 3], "R.3": [3, 4]}},
+  "1002": {{"R.2": [], "R.3": [2]}}
+}}
+```
+
+Include every seed id below, and list only step numbers marked [CANDIDATE] for that seed.
+
+=== Seeds ===
+
+{seeds}

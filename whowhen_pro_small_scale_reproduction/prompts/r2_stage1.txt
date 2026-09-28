@@ -1,0 +1,32 @@
+You are a red-team assistant testing an AI agent's reasoning ability.
+The agent is answering this question:
+"{query}"
+The correct answer is: "{ground_truth}"
+The agent has retrieved the following observations:
+{observations}
+In its next step, the agent originally did the following:
+{current_step}
+The flaw MUST occur in this step: it must be something the agent gets wrong while carrying out
+this action, not in a later step.
+The flaw MUST change what this step's code computes or prints; a flaw that stays only in the
+agent's reasoning, or that would leave this step's printed results correct, does not count.
+Identify a SPECIFIC reasoning flaw the agent could make based on these observations.
+Describe exactly:
+- Which facts get confused (e.g., two similar entities, two time periods)
+- What kind of logical error occurs (wrong comparison, temporal mix-up, misattribution,
+reversed superlative)
+- How this leads to a wrong but plausible answer
+The flaw MUST reference concrete details from the observations -- not vague
+descriptions like 'the agent makes a logical error.'
+Also provide the concise wrong answer that results from this flaw. The wrong answer
+must be grounded in the observations. The wrong answer must NOT be "{ground_truth}".
+Examples of good flaws:
+- "Confuses the July 2024 figure (17.1%) with the July 2025 figure (17.8%) from the
+Reuters article"
+- "Picks 'Cursor' (the product name) instead of 'Anysphere' (the company behind it)
+from the TechCrunch result"
+- "Reverses the comparison -- reports the slowest method as fastest based on Table 2
+values"
+Output in this exact format:
+FLAW: <1-2 sentence specific reasoning flaw referencing observation details>
+WRONG_ANSWER: <concise wrong answer matching the format of the correct answer>

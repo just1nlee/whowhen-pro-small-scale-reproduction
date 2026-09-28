@@ -1,0 +1,19 @@
+Continue the agent's response for this step. The agent is answering: "{query}"
+The last observation was:
+{last_observation}
+The agent now performs a calculation but makes a specific calculation error:
+"{flaw}"
+The agent's approach is otherwise correct: it uses the right data and the right method,
+but the calculation itself contains the error described above. The agent does not
+notice the error. It does NOT conclude yet.
+The agent's reasoning MUST read as an ordinary calculation step, and its code MUST
+actually carry out the flawed calculation so that the printed result reflects the error.
+The agent must NOT acknowledge or hint that anything is wrong with the calculation.
+The agent MUST write analysis code -- it must NOT call final_answer at this step.
+Format:
+Thought:
+[reasoning]
+<code>
+[code -- the agent writes Python code (e.g. pandas) that carries out the calculation,
+including the error. Do NOT call final_answer -- the agent is still working.]
+</code>
