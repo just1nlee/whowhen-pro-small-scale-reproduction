@@ -117,7 +117,7 @@
  "n_steps": 12,
  "any_step_error": true,
  "run_error": null,
- "is_seed": true,
+ "is_seed": false,
  "usage": [
   {
    "model": "claude-haiku-4-5",
@@ -216,5 +216,6 @@
    "cost_usd": 0.012943
   }
  ],
- "cost_usd": 0.103422
+ "cost_usd": 0.103422,
+ "excluded_reason": "fails the warm-start replay fidelity check: step 1's error message lists the authorized imports in set order, which varies with Python's hash randomization, so the pre-injection context can't be reproduced byte for byte"
 }

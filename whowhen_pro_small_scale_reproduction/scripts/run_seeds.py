@@ -11,15 +11,12 @@ so an interrupted batch can be resumed without paying twice.
 
 import argparse
 import json
-import os
 import random
-import tempfile
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
-from smolagents import CodeAgent
-from smolagents.memory import ActionStep
 
+from repro.agent import MAX_STEPS, MODEL_ID, make_agent, record_steps, task_workspace
 from repro.claude_model import ClaudeModel
 from repro.dabench import load_tasks
 from repro.grader import grade
@@ -28,18 +25,16 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "outputs" / "seeds"
 PAPER_TRACES = ROOT.parent / "whowhen-pro" / "data" / "text.jsonl"
 
-MODEL_ID = "claude-haiku-4-5"
-MAX_STEPS = 15
 MIN_SEED_STEPS = 2
 SELECTION_SEED = 0
 # Runs that pass grading but are excluded as seeds by hand, with the reason.
 EXCLUDED_SEEDS = {
     321: "used all MAX_STEPS steps; no step budget left for a post-injection rollout, "
          "so an injected run could fail from the step cap rather than the injected error",
+    590: "fails the warm-start replay fidelity check: step 1's error message lists the authorized "
+         "imports in set order, which varies with Python's hash randomization, so the pre-injection "
+         "context can't be reproduced byte for byte",
 }
-# Libraries the paper's own DA-Bench traces imported.
-AUTHORIZED_IMPORTS = ["pandas", "numpy", "scipy", "scipy.*", "sklearn", "sklearn.*",
-                      "statsmodels", "statsmodels.*", "statistics", "re", "datetime"]
 
 
 def paper_question_ids(tasks) -> list[int]:
@@ -72,31 +67,13 @@ def select_ids(tasks, n: int) -> list[int]:
 
 def run_one(task, verbose: bool) -> dict:
     model = ClaudeModel(MODEL_ID)
-    agent = CodeAgent(tools=[], model=model, max_steps=MAX_STEPS, verbosity_level=2 if verbose else 0,
-                      additional_authorized_imports=AUTHORIZED_IMPORTS)
-
-    # The prompt points the agent at ./data/<file>, so run inside a scratch
-    # folder where that path links to the real CSV.
-    workspace = Path(tempfile.mkdtemp(prefix=f"dabench_{task.id}_"))
-    (workspace / "data").mkdir()
-    (workspace / "data" / task.file_name).symlink_to(task.csv_path)
-    prev_cwd = os.getcwd()
-    os.chdir(workspace)
-    try:
-        answer, run_error = agent.run(task.prompt()), None
-    except Exception as e:  # API failures etc. -- record and move on
-        answer, run_error = None, f"{type(e).__name__}: {e}"
-    finally:
-        os.chdir(prev_cwd)
-
-    steps = [{
-        "step_number": s.step_number,
-        "model_output": s.model_output,
-        "code": s.code_action,
-        "observation": s.observations,
-        "error": str(s.error) if s.error else None,
-        "is_final_answer": s.is_final_answer,
-    } for s in agent.memory.steps if isinstance(s, ActionStep)]
+    agent = make_agent(model, verbose)
+    with task_workspace(task):
+        try:
+            answer, run_error = agent.run(task.prompt()), None
+        except Exception as e:  # API failures etc. -- record and move on
+            answer, run_error = None, f"{type(e).__name__}: {e}"
+    steps = record_steps(agent)
 
     g = grade(task, answer)
     return {
@@ -137,7 +114,8 @@ def main():
 
     runs_dir = OUT_DIR / "runs"
     runs_dir.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "selected_ids.json").write_text(json.dumps(ids))
+    if not args.ids:  # --ids is for ad-hoc runs; don't overwrite the batch's selection
+        (OUT_DIR / "selected_ids.json").write_text(json.dumps(ids))
 
     spent = 0.0
     for i, task_id in enumerate(ids, 1):
