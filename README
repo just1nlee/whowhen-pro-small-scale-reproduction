@@ -1,0 +1,401 @@
+Who&When Pro Small-Scale Reproduction
+=====================================
+
+A small-scale reproduction of the data generation and evaluation pipeline
+from "Who&When Pro: Can LLMs Really Attribute Failures in AI Agents?"
+(Liu et al., arXiv:2607.09996). It builds labeled agent-failure traces by
+injecting a single error into an agent's own successful runs, then measures
+how well LLM judges can find the step that broke the run and name what went
+wrong.
+
+The full benchmark spans 12,326 traces across 26 benchmarks and 15 agent
+frameworks. I rebuilt the whole pipeline end to end at small scale, on one
+framework and one benchmark: a smolagents CodeAgent answering DA-Bench
+data-analysis questions. I generated 34 seed runs, turned them into 14
+labeled failure traces, evaluated those with the paper's own harness, and
+compared the results against the paper's released traces for the same
+setting. The whole thing cost about $6.50 in API calls.
+
+The idea being reproduced
+-------------------------
+
+Failure attribution asks: given a failed agent run, which step was the
+decisive error, the earliest step that, if fixed alone, would have turned
+the failure into a success (the definition from the original Who&When
+paper, Zhang et al., ICML 2025). Labeling this by hand is slow and
+unreliable, so Who&When Pro generates labels by construction.
+
+Start from a run that succeeded. Pick a step t, replay steps 1 to t-1
+exactly as they happened, swap in a corrupted action at step t, and let the
+agent continue on its own. If the run now fails, t is the decisive step:
+undoing the change gives back the original success. The key improvement
+over earlier injection methods is the exact replay. Those methods rerun the
+task from scratch, so the agent can drift before the injection point and
+the label is only approximate.
+
+The corrupted step is built in two stages. A stronger "frontier" model
+reads the task, the correct answer, and what the agent has seen so far, and
+describes a specific, plausible mistake. That description is then added to
+the base agent model's context for that one step, so the agent writes the
+mistake itself, in its own style.
+
+Scope
+-----
+
+* Framework: smolagents, single-agent CodeAgent. It is the largest share of
+  the paper's text traces, has the simplest structure (no multi-agent
+  orchestration), and its warm-start replay is documented in the paper
+  (Appendix F.3).
+* Benchmark: DA-Bench (InfiAgent-DABench). Each question comes with a local
+  CSV and is answered by writing Python, so there are no live web calls and
+  grading is exact-match with the official evaluator.
+* Error modes: R.2 (reasoning error) and R.3 (calculation error).
+* Models: Claude Haiku 4.5 as the base agent, Claude Sonnet 5 as the
+  frontier model for injection, and Claude Sonnet 4.6 and Claude Haiku 4.5
+  as judges.
+
+I chose the error modes from the paper's failure-mode profile for this
+setting: across the 327 smolagents x DA-Bench traces the paper released,
+the modes are A.3 (135), R.4 (60), R.2 (55), A.2 (40), R.3 (37), and R.1
+(0). R.1 (hallucination) has a published prompt template, but it is built
+around web search and never occurs on DA-Bench, so I left it out. R.3 has
+no published template, so I wrote my own (see Error injection).
+
+Haiku 4.5 was chosen to fit a $5 starting budget. Like the paper's
+GPT-4.1, it writes its reasoning into the visible output the judge reads
+rather than hiding it. Sonnet 4.6 is one of the judges the paper
+evaluates, which gives a direct comparison.
+
+
+Pipeline
+========
+
+Seed generation
+---------------
+
+Code: repro/dabench.py, repro/grader.py, repro/claude_model.py,
+repro/agent.py, scripts/run_seeds.py. Output: outputs/seeds/.
+
+The agent's task prompt is not my own. All 327 of the paper's released
+smolagents x DA-Bench traces start from the same fixed template, so I
+recovered it and filled it from the official DA-Bench files. My prompts
+match the released ones character for character, 327 of 327.
+
+Answers are graded by DA-Bench's official evaluator (eval_closed_form.py),
+copied unmodified into da-bench/ and pinned to upstream commit 0bf51d9.
+Grading is strict: the answer must use the required @name[value] format,
+and a question only passes if every sub-answer is correct. I considered
+filtering out injected runs that fail only on formatting, since those
+arguably fail for a different reason than the injected error, but the
+paper does not do this, so I kept the official evaluator as the only
+pass/fail rule.
+
+I ran the agent on 40 questions drawn from the 163 DA-Bench questions the
+paper's traces use, balanced across difficulty (14 easy, 13 medium, 13
+hard) and picked with a fixed random seed. The agent gets at most 15 steps
+and can import only the libraries the paper's own traces used (pandas,
+numpy, scipy, scikit-learn, statsmodels, statistics, re, datetime).
+Every step's reasoning, code, output, and error is recorded, which is what
+the replay stage needs.
+
+36 of 40 runs were correct. The four wrong ones look like the paper's
+error types: a missing bracket in the answer format (A.3), a standard
+deviation that divided by n instead of n-1 (R.3), a small rounding
+difference, and a gold answer that contains a file path from the original
+benchmark environment, which no agent could reproduce. A seed must be
+correct with at least 2 steps. I excluded two more by hand: q321 used all
+15 steps, leaving no room for an injected run to continue, and q590 cannot
+be replayed exactly (below). That leaves 34 seeds.
+
+Warm-start replay
+-----------------
+
+Code: repro/replay_model.py, scripts/check_replay.py.
+
+The paper replays smolagents runs with a SQLite cache keyed by a SHA-256
+hash of each tool call's parameters, so that web searches return the same
+results as the original run. I did not build this cache, because my agent
+makes no external tool calls. Its only action is running Python on a local
+CSV, which is a stateful environment: later steps depend on variables
+earlier steps created. The paper handles stateful environments by
+re-executing the recorded actions with a fidelity check, and that is what
+I implemented.
+
+smolagents talks to its model through a single "give me the next reply"
+function. I wrote a replay model that answers the first t-1 of those calls
+with the replies recorded in the seed run instead of calling the LLM.
+smolagents parses and runs that code exactly as it would a live reply,
+which rebuilds both the conversation and the Python state. From step t
+onward, calls go to the live model. After each replayed step, the output is
+compared byte for byte with the recording, and any difference aborts the
+attempt, as in the paper.
+
+Replaying every step of every seed with no API calls reproduces 34 of the
+35 correct seeds exactly. The exception, q590, hit an import error whose
+message lists the allowed imports in set order, which changes with Python's
+hash randomization. That message is part of the agent's context, so the
+state before any later step cannot be reproduced exactly, and I dropped the
+seed.
+
+Error injection
+---------------
+
+Code: repro/injection.py, scripts/build_eligibility_prompt.py,
+scripts/pick_injection_steps.py, scripts/run_injection.py, prompts/.
+Output: outputs/injection/.
+
+Choosing the step. The paper samples t conditioned on the failure mode,
+skipping steps with execution errors and steps where that mode could not
+naturally occur, but does not publish the exact rules. Its released
+DA-Bench traces never inject at step 1 or at the final-answer step, and
+almost always at steps 2 to 5. My candidates are steps 2 to T-1 without
+errors (77 steps across 34 seeds). A prompt I wrote
+(prompts/step_eligibility.txt) then asks, for each candidate and mode,
+whether that kind of mistake could naturally happen there and change the
+answer: R.3 needs a step that computes a number the answer depends on, R.2
+needs a step that makes a choice or interpretation. It also excludes steps
+where the full correct answer was already printed. Claude Sonnet 5 on
+claude.ai declined this prompt, so the judgments were made by Claude Opus
+5.5 inside a Claude Code session; the prompt and the response are both
+saved. Step t is then drawn at random from each eligible list with a fixed
+seed, giving 64 attempts (33 R.2, 31 R.3).
+
+Stage 1, the flaw. Sonnet 5 gets the task, the correct answer, the outputs
+of steps 1 to t-1, and the seed's original step t, and returns a FLAW (a
+specific mistake) and the WRONG_ANSWER it would lead to. For R.2 this is
+the paper's Appendix K.2 prompt, word for word including its web-flavored
+examples. For R.3 I wrote a template that mirrors the R.2 one line for
+line, with the paper's R.3 definition and made-up data-analysis examples
+(n vs n-1, the wrong denominator, rounding too early). It draws the
+boundary as "right data, right method, wrong computation"; misreading which
+data or column to use counts as R.2.
+
+Stage 2, the corrupted step. At step t, the stage 2 prompt, built around
+the FLAW, is appended to Haiku's normal context for that one call, and
+Haiku writes the step. The prompt is never stored in the agent's memory, so
+later steps and the final trace contain only Haiku's own reply. I changed
+one line of the paper's R.2 stage 2 prompt: it tells the agent to call a
+web-search tool, and my agent has none, so it now tells the agent to write
+analysis code instead, still without calling final_answer.
+
+A conceptual problem with R.3 in a code-writing agent: Python does the
+arithmetic, so the agent cannot really "add wrong." Calculation errors show
+up as wrong formulas in code (ddof, rounding, denominators), which sits
+very close to R.2's "local derivation bug." I kept the R.3 label for these
+and treat the ambiguity as a finding (see Results).
+
+Pilots. I ran the same four attempts three times before the full run, and
+kept the first two pilots in outputs/injection/pilot1 and pilot2.
+
+    Pilot  Changes before the pilot                    Mistake made  Failed
+    1      paper's prompts, R.2 web line swapped        1 of 4        0 of 4
+    2      stage 1 also sees the seed's step t; R.2     2 of 4        1 of 4
+           stage 2 requires the code to act on it
+    3      stage 1: the flaw must change what this      3 of 4        1 of 4
+           step computes or prints
+
+In pilot 1, Sonnet only saw the outputs before step t, not the step
+itself. It guessed wrong about which std formula the gold answer used and
+"injected" the correct one, and it planned a mistake for a test that only
+ran a step later. Haiku also ignored an instruction to use the wrong
+column. The fixes are departures from the paper's published templates, but
+they follow the paper's description that the frontier model reads the
+seed's context up to step t. After pilot 3, the remaining losses were
+mostly Haiku double-checking its own work, not prompt problems.
+
+Filtering and export
+--------------------
+
+Code: scripts/export_eval_data.py. Output: outputs/eval_data/.
+
+Of the 64 attempts, 14 ended in a wrong answer. The paper keeps only failed
+runs and removes two kinds of trace (section 3.3): ones where the injected
+step leaks the construction (for example, mentions being told to make a
+mistake), and ones where the correct answer was already visible before
+step t. The leak check scans the injected step for phrases like "inject",
+"instruct", "flaw", and "deliberate"; I also read all 14 injected steps by
+hand. The salience check looks for every gold value in the earlier
+outputs, and skips answers shorter than three characters, since values
+like "4" match unrelated numbers in any printed table (one trace, q514, is
+flagged as unchecked). All 14 traces pass. None failed on formatting only,
+hit the step limit, or had the injected step call final_answer.
+
+Some injected steps contain comments that contradict the code. In q496, a
+comment saying the STEM feature is created as a sum sits right above a
+line that takes the mean; q376, q514, and q716 have similar tells. They do
+not mention the injection, so they pass the paper's rule, but they point
+straight at the bad step.
+
+The kept traces are written in the paper's release format (one JSON row
+per trace with the task, trajectory, and ground truth) so the paper's
+evaluation harness reads them unchanged. The judge sees only the question
+and the trajectory; the flaw text and filter decisions live in a separate
+manifest.json that is never shown to it.
+
+Evaluation
+----------
+
+Code: whowhen_eval/ (the paper's harness, unmodified).
+Output: outputs/eval_results/, outputs/control_data/,
+outputs/control_results/.
+
+The judge reads the whole failed trace and names the agent, the decisive
+step, and the error mode from the full 17-mode taxonomy (the all-at-once
+protocol, the paper's primary one). Scoring is the harness's own: step
+accuracy, error-mode macro-F1 (the paper's Error column), and joint
+accuracy. Agent accuracy does not apply to a single-agent framework. Both
+judges ran with the harness defaults (temperature 0, 2048 output tokens).
+
+As a control, I also ran Sonnet 4.6 on the paper's own released traces for
+exactly this setting: all 92 smolagents x DA-Bench traces labeled R.2 (55)
+or R.3 (37). This shows whether my traces are as hard to attribute as the
+paper's, without the paper's cross-benchmark averaging getting in the way.
+
+
+Results
+=======
+
+Injection yield
+---------------
+
+14 of 64 attempts (22%) produced a usable failure, 6 of 33 for R.2 (18%)
+and 8 of 31 for R.3 (26%). The rest recovered. By injection step: t=2 gave
+5 of 32, t=3 gave 8 of 28, t=4 gave 1 of 3, and t=5 gave 0 of 1. Sonnet 5
+never refused a stage 1 prompt.
+
+Judge accuracy
+--------------
+
+Judges on my 14 traces, next to the paper's Table 4 row for Sonnet 4.6
+(averaged over all text benchmarks):
+
+    Judge                    Step    Error F1   Joint   Mode acc.
+    Sonnet 4.6 (mine)        85.7%   45.5       28.6%   5/14
+    Haiku 4.5 (mine)         92.9%   37.8       35.7%   5/14
+    Sonnet 4.6 (paper)       69.8%   19.1       22.4%   -
+
+Haiku and Sonnet differ by only 1-2 traces, which is noise at this size.
+Haiku judging traces from its own model did not visibly hurt it. With 14
+traces each one is about 7 percentage points, so my own numbers should be
+read as "consistent with" or "higher than" the paper, not as precise
+estimates.
+
+Comparison with the paper's traces
+----------------------------------
+
+Same judge (Sonnet 4.6), same setting, my traces against the paper's:
+
+                             Mine (14)   Paper's (92)
+    Step accuracy            85.7%       46.7%
+    Error-mode accuracy      35.7%       20.7%
+    Error macro-F1           45.5        23.3
+    Joint                    28.6%       14.1%
+    Mean length / mean t     4.7 / 2.7   5.4 / 3.6
+    Random-step baseline     22.3%       20.9%
+
+My traces are much easier to localize than the paper's. The step accuracy
+gap is significant even with 14 traces (Fisher's exact test, p = 0.009);
+the error-mode gap is not (p = 0.30). Trace length does not explain it: on
+traces of 4 steps or fewer the judge scored 100% on mine against 67% on the
+paper's, and on 5-6 step traces 78% against 36%. The likely causes are that
+my injected errors are visible slips in the code, some with contradicting
+comments; that my injection points are earlier; and that Haiku is a
+different base agent than the paper's GPT-4.1 and Gemini 3 Flash.
+
+Error modes
+-----------
+
+Error-mode classification is weak on both sets, which reproduces the
+paper's central finding. R.3 is the hardest: Sonnet named it correctly on 2
+of my 8 R.3 traces and on 1 of the paper's 37, calling most of them R.4 or
+R.2. Since this happens on the paper's own data, it is not an artifact of
+my R.3 template; it looks like a property of the taxonomy for agents whose
+arithmetic is done by code. It matches a trace I annotated by hand before
+building anything (dabench_smolagents_0001), where the agent picked vote
+counts instead of the visible percentage columns: I read that as R.2, while
+the official label is A.3 (output format).
+
+
+Discussion
+==========
+
+Where this differs from the paper
+---------------------------------
+
+* Base agent: Claude Haiku 4.5 instead of GPT-4.1 / Gemini 3 Flash.
+* Replay: re-execution with byte-level fidelity checks; no SHA-256 tool
+  cache, since the agent makes no external tool calls.
+* Step selection: my own eligibility prompt, judged by Claude Opus 5.5.
+* Prompts: the R.2 web-search instruction replaced with analysis code; my
+  own R.3 templates; stage 1 also sees the original step t; the flaw must
+  change the step's code or output; R.2 stage 2 requires the code to act on
+  the flaw.
+* No retries: the paper retries a failed attempt at another step; I made
+  one attempt per seed and mode and report the yield.
+* Salience check: skips gold values shorter than three characters.
+* Scale: 14 traces, one framework, one benchmark, two modes.
+* Taxonomy: the released taxonomy.yaml has 17 modes, while the paper
+  describes 18.
+
+Limitations
+-----------
+
+The sample is small, so most per-mode comparisons are anecdotal. The mode
+labels are the injected ones, as in the paper, but several of my traces
+arguably belong to a different mode (the two q666 traces make the same ddof
+mistake under different labels). Step labels are decisive by construction
+only if the failure comes from the injection; I did not run the check that
+replays to step t without injecting anything, which would measure how often
+the agent fails on its own after a warm start. The eligibility judgments
+were made by a single model without a second annotator.
+
+
+Running it
+==========
+
+Everything runs from the repository root with the project's Python:
+
+    python3.13 -m venv .venv
+    .venv/bin/pip install -r requirements.txt
+
+The DA-Bench data goes in da-bench/data/ (see da-bench/SOURCE.md) and the
+Who&When Pro release in whowhen-pro/ (Hugging Face: Leoxx/whowhen_pro).
+API keys go in .env (ANTHROPIC_API_KEY).
+
+Stage 1, seed generation, and the stage 2 replay check:
+
+    .venv/bin/python -m scripts.run_seeds --n 40
+    .venv/bin/python -m scripts.check_replay
+
+Stage 3, error injection:
+
+    .venv/bin/python -m scripts.build_eligibility_prompt
+    .venv/bin/python -m scripts.pick_injection_steps
+    .venv/bin/python -m scripts.run_injection
+
+Stage 4, filtering and export:
+
+    .venv/bin/python -m scripts.export_eval_data
+
+Stage 5, evaluation:
+
+    .venv/bin/python -m whowhen_eval.run --model claude-sonnet-4-6 \
+        --data-root outputs/eval_data --modality text \
+        --out outputs/eval_results
+    .venv/bin/python -m whowhen_eval.leaderboard \
+        --results outputs/eval_results
+
+All outputs, including every run, prompt, and model reply, are committed
+under outputs/, since the LLM runs cannot be regenerated identically.
+Finished runs are skipped on rerun, so nothing is paid for twice.
+
+
+Credits
+=======
+
+* DA-Bench (InfiAgent-DABench), including the official evaluator: Apache
+  2.0 (see da-bench/SOURCE.md).
+* Who&When Pro dataset and taxonomy: CC BY 4.0 (see
+  outputs/eval_data/SOURCE.md and outputs/control_data/SOURCE.md).
+* Evaluation harness in whowhen_eval/: the Who&When Pro authors' code, MIT
+  license (see whowhen_eval/SOURCE.md).
